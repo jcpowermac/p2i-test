@@ -1,0 +1,10 @@
+- name: testing
+  hosts: localhost
+  gather_facts: True
+  tasks:
+    - debug:
+        msg: "{{ hostvars[inventory_hostname] }}"
+
+
+
+  
