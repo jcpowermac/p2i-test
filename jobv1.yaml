@@ -30,6 +30,8 @@ spec:
           value: /opt/app-root/src/.ssh/id_rsa/ssh-privatekey
         - name: ANSIBLE_LOCAL_TEMP
           value: /tmp/ansible-temp
+        - name: SSH_KEY
+          value: /tmp/foo
         volumeMounts:
         - name: sshkey
           mountPath: /opt/app-root/src/.ssh/id_rsa
