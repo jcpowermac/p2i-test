@@ -27,10 +27,10 @@ spec:
         - name: PLAYBOOK_FILE
           value: "/opt/app-root/src/main.yml"
         - name: OPTS
-          value: "-vvv --private-key /opt/app-root/src/ssh/id_rsa"
+          value: "-vvvv --private-key /opt/app-root/src/.ssh/id_rsa -R \"-o UserKnownHostsFile=/dev/null\""
         volumeMounts:
         - name: sshkey
-          mountPath: /opt/app-root/src/ssh/id_rsa
+          mountPath: /opt/app-root/src/.ssh/id_rsa
       restartPolicy: Never
 
 
