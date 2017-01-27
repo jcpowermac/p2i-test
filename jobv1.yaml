@@ -1,0 +1,25 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: p2i-test 
+spec:
+  parallelism: 1    
+  completions: 1    
+  template:         
+    metadata:
+      name: p2-test 
+      labels:
+        app: p2i-test
+    spec:
+      containers:
+      - name: p2i-test
+        image: 172.30.7.246:5000/ansible/p2i-test 
+        env:
+        - name: PLAYBOOK_FILE
+          value: "/opt/app-root/src/main.yml"
+        - name: OPTS
+          value: "-vvv -c local"
+      restartPolicy: Never
+
+
