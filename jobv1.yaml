@@ -2,23 +2,23 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: p2i-test 
+  name: playbook2image-example 
 spec:
   parallelism: 1    
   completions: 1    
   template:         
     metadata:
-      name: p2-test 
+      name: playbook2image-example
       labels:
-        app: p2i-test
+        app: playbook2image-example
     spec:
       volumes:
       - name: sshkey
         secret:
           secretName: sshkey
       containers:
-      - name: p2i-test
-        image: 172.30.7.246:5000/ansible/p2i-test 
+      - name: playbook2image-example 
+        image: 172.30.7.246:5000/playbook2image-example/playbook2image-example 
         env:
         - name: INVENTORY_URL
           value: "https://gist.githubusercontent.com/jcpowermac/3010d8115f66cef7aa2a87448be5d6c9/raw/0d60e4b42e06468470b5ac7c57d076eaefbdd032/hosts.ose"
