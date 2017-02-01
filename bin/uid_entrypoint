@@ -1,6 +1,12 @@
 #!/bin/sh
+
+set -x
 USER_ID=$(id -u)
 GROUP_ID=$(id -g)
 sed "s@${USER_NAME}:x:\${USER_ID}:\${GROUP_ID}@${USER_NAME}:x:${USER_ID}:${GROUP_ID}@g" ${APP_ROOT}/etc/passwd.template > /etc/passwd
 ssh-keygen -A
+
+cp -r /tmp/.ssh ${APP_HOME}
+chown ${USER_ID}:${GROUP_ID}/.ssh
+chmod -r 0600 ${APP_HOME}/.ssh
 exec "$@"
