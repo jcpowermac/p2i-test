@@ -30,4 +30,4 @@ WORKDIR ${APP_ROOT}
 ### arbitrary uid recognition at runtime - for OpenShift deployments
 RUN sed "s@${USER_NAME}:x:${USER_UID}:0@${USER_NAME}:x:\${USER_ID}:\${GROUP_ID}@g" /etc/passwd > ${APP_ROOT}/etc/passwd.template
 ENTRYPOINT [ "uid_entrypoint" ]
-CMD ["/usr/sbin/sshd", "-D"]
+CMD ["/usr/sbin/sshd", "-D", "-d"]
