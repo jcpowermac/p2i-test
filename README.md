@@ -1,18 +1,23 @@
-## playbook2image example
+## playbook2image testing
 
-Using [playbook2image](https://github.com/aweiteka/playbook2image) project as a guide this is an example of how to use within OpenShift.
-
-Commands to test this project.  The `INVENTORY_URL` listed in the jobv1.yaml needs to be modified to your inventory.
+This project provides testing for [playbook2image](https://github.com/aweiteka/playbook2image) project without external dependencies.
+It provides an example template that could be modified to support additional use cases.
 
 ```
-oc new-project playbook2image-example
-oc secrets new-sshauth sshkey --ssh-privatekey ~/.ssh/id_rsa
-oc new-build docker.io/aweiteka/playbook2image~https://github.com/jcpowermac/playbook2image-example
-oc logs -f bc/playbook2image-example
-oc create -f jobv1.yaml
+curl -O https://raw.githubusercontent.com/jcpowermac/playbook2image-example/master/template.yaml
+ssh-keygen -t rsa -f /tmp/p2ikeys/id_rsa -N ''
+oc new-project at
+oc secrets new sshkeys /tmp/p2ikeys/id_rsa /tmp/p2ikeys/id_rsa.pub authorized_keys=/tmp/p2ikeys/id_rsa.pub
+```
+
+The job is unable to locate the image to use, modify the `image` variable for your environment.
+
+```
+oc process -f template.yaml | oc create -f -
+
 oc get job
 oc get pod
-oc logs -f playbook2image-example-swd8f
+oc logs -f  
 oc get jobs
 ```
 
