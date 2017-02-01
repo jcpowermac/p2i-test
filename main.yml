@@ -1,5 +1,7 @@
 - name: testing
-  hosts: masters 
+  hosts: test
+  remote_user: default
+  become: False
   gather_facts: True
   tasks:
     - debug:
