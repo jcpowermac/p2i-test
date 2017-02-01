@@ -16,6 +16,7 @@ RUN yum install -y  --setopt=tsflags=nodocs centos-release-openshift-origin open
     yum install -y --setopt=tsflags=nodocs origin-clients && \ 
     yum clean all -y && \
     echo "Port 22222" >> /etc/ssh/sshd_config && \
+    echo "PubkeyAuthentication yes" >> /etc/ssh/sshd_config && \
     #ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N '' && \
     mkdir -p ${APP_HOME} ${APP_ROOT}/etc && \
     chmod -R ug+x ${APP_ROOT}/bin ${APP_ROOT}/etc /tmp/user_setup && \

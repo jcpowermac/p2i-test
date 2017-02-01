@@ -12,6 +12,10 @@ spec:
       labels:
         app: playbook2image-example
     spec:
+      volumes:
+      - name: sshkeys
+        secret:
+          secretName: sshkeys
       containers:
       - name: test 
         image: 172.30.7.246:5000/playbook2image-ex/test
@@ -28,8 +32,10 @@ spec:
           value: /tmp/ansible-temp
         - name: SSH_KEY
           value: /tmp/foo
+        - name: OPTS
+          value: "-vvvv"
         volumeMounts:
-        - name: sshkey
+        - name: sshkeys
           mountPath: /opt/app-root/src/.ssh
       restartPolicy: Never
 
