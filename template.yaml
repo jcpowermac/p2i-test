@@ -22,18 +22,14 @@ objects:
       git:
         uri: https://github.com/jcpowermac/playbook2image-example
       type: Git
+      contextDir: ssh-container
     strategy:
       dockerStrategy:
-        dockerfilePath: ssh-container/Dockerfile
         from:
           kind: ImageStreamTag
           name: centos:latest
       type: Docker
     triggers:
-    - github:
-      type: GitHub
-    - generic:
-      type: Generic
     - type: ConfigChange
     - imageChange: {}
       type: ImageChange
@@ -64,10 +60,6 @@ objects:
           name: playbook2image:latest
       type: Source
     triggers:
-    - github:
-      type: GitHub
-    - generic:
-      type: Generic
     - type: ConfigChange
     - imageChange: {}
       type: ImageChange
@@ -158,10 +150,12 @@ objects:
     labels:
       app: ansible-test-job 
       job-name: ansible-test-job 
-    name: test
+    name: ansible-test-job 
   spec:
     completions: 1
     parallelism: 1
+    selector:
+      app: ansible-test-job
     template:
       metadata:
         creationTimestamp: null
@@ -186,7 +180,7 @@ objects:
             value: /tmp/foo
           - name: OPTS
             value: -vvvv
-          image: ' ' 
+          image: '172.30.7.246:5000/at/ansible-test-job'
           imagePullPolicy: Always
           name: ansible-test-job 
           resources: {}
@@ -240,8 +234,8 @@ objects:
     creationTimestamp: null
     generation: 1
     labels:
-      app: playbook2image-example
-    name: playbook2image-example
+      app: ssh-container 
+    name: ssh-container 
   spec:
     tags:
     - annotations: null
@@ -257,6 +251,8 @@ objects:
     annotations: null
     creationTimestamp: null
     generation: 1
+    labels:
+      app: ansible-test-job 
     name: ansible-test-job 
   spec:
     tags:
