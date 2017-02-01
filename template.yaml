@@ -14,7 +14,6 @@ objects:
       app: playbook2image-example
     name: playbook2image-example
   spec:
-    nodeSelector: null
     output:
       to:
         kind: ImageStreamTag
@@ -54,7 +53,6 @@ objects:
       build: ssh-keygen
     name: ssh-keygen
   spec:
-    nodeSelector: null
     output:
       to:
         kind: ImageStreamTag
@@ -96,7 +94,6 @@ objects:
       build: test
     name: test
   spec:
-    nodeSelector: null
     output:
       to:
         kind: ImageStreamTag
@@ -132,7 +129,7 @@ objects:
     annotations:
       openshift.io/generated-by: OpenShiftNewApp
     creationTimestamp: null
-    generation: 1
+    generation: 38
     labels:
       app: playbook2image-example
     name: playbook2image-example
@@ -161,7 +158,7 @@ objects:
           deploymentconfig: playbook2image-example
       spec:
         containers:
-        - image: 172.30.7.246:5000/playbook2image-ex/playbook2image-example@sha256:7086896d1ef26634728abd12685eaf04c4a0ef235edea32e06524286c1cf111a
+        - image: 172.30.7.246:5000/playbook2image-ex/playbook2image-example@sha256:1868757dd8e45c0506c45a613ef7b2d547b6840f5acc257ee8dee24ee13a41ee
           imagePullPolicy: Always
           name: playbook2image-example
           ports:
@@ -170,7 +167,11 @@ objects:
           resources: {}
           terminationMessagePath: /dev/termination-log
           volumeMounts:
+          - mountPath: /tmp/.ssh
+            name: sshkeys
           - mountPath: /opt/app-root/src/.ssh
+            name: sshkeys
+          - mountPath: /opt/app-root/.ssh
             name: sshkeys
         dnsPolicy: ClusterFirst
         restartPolicy: Always
@@ -179,7 +180,6 @@ objects:
         volumes:
         - name: sshkeys
           secret:
-            defaultMode: 420
             secretName: sshkeys
     test: false
     triggers:
@@ -193,7 +193,11 @@ objects:
           name: playbook2image-example:latest
           namespace: playbook2image-ex
       type: ImageChange
-  status: {}
+  status:
+    availableReplicas: 1
+    observedGeneration: 38
+    replicas: 1
+    updatedReplicas: 1
 - apiVersion: v1
   kind: Service
   metadata:
@@ -216,3 +220,68 @@ objects:
     type: ClusterIP
   status:
     loadBalancer: {}
+- apiVersion: batch/v1
+  kind: Job
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: playbook2image-example
+      controller-uid: 8f375aa5-e8bd-11e6-8568-525400f50924
+      job-name: test
+    name: test
+  spec:
+    completions: 1
+    parallelism: 1
+    selector:
+      matchLabels:
+        controller-uid: 8f375aa5-e8bd-11e6-8568-525400f50924
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: playbook2image-example
+          controller-uid: 8f375aa5-e8bd-11e6-8568-525400f50924
+          job-name: test
+        name: test
+      spec:
+        containers:
+        - env:
+          - name: INVENTORY_FILE
+            value: /opt/app-root/src/hosts.ini
+          - name: ANSIBLE_HOST_KEY_CHECKING
+            value: "False"
+          - name: PLAYBOOK_FILE
+            value: /opt/app-root/src/main.yml
+          - name: ANSIBLE_PRIVATE_KEY_FILE
+            value: /tmp/ssh/id_rsa
+          - name: ANSIBLE_LOCAL_TEMP
+            value: /tmp/ansible-temp
+          - name: SSH_KEY
+            value: /tmp/foo
+          - name: OPTS
+            value: -vvvv
+          image: 172.30.7.246:5000/playbook2image-ex/test
+          imagePullPolicy: Always
+          name: test
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - mountPath: /tmp/ssh
+            name: sshkeys
+        dnsPolicy: ClusterFirst
+        restartPolicy: Never
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: sshkeys
+          secret:
+            secretName: sshkeys
+  status:
+    completionTime: 2017-02-01T20:32:42Z
+    conditions:
+    - lastProbeTime: 2017-02-01T20:32:42Z
+      lastTransitionTime: 2017-02-01T20:32:42Z
+      status: "True"
+      type: Complete
+    startTime: 2017-02-01T20:32:33Z
+    succeeded: 1
