@@ -12,8 +12,7 @@ ENV APP_HOME=${APP_ROOT}/src  PATH=$PATH:${APP_ROOT}/bin
 COPY user_setup /tmp/
 COPY bin/ ${APP_ROOT}/bin/
 
-RUN yum install -y  --setopt=tsflags=nodocs centos-release-openshift-origin openssh-server openssh-clients && \
-    yum install -y --setopt=tsflags=nodocs origin-clients && \ 
+RUN yum install -y  --setopt=tsflags=nodocs openssh-server openssh-clients && \
     yum clean all -y && \
     echo "Port 22222" >> /etc/ssh/sshd_config && \
     echo "PubkeyAuthentication yes" >> /etc/ssh/sshd_config && \

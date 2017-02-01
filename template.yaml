@@ -2,22 +2,19 @@ apiVersion: v1
 kind: Template
 metadata:
   creationTimestamp: null
-  name: p2i
+  name: playbook2image-testing 
 objects:
 - apiVersion: v1
   kind: BuildConfig
   metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewApp
+    annotations: null
     creationTimestamp: null
-    labels:
-      app: playbook2image-example
-    name: playbook2image-example
+    name: ssh-container 
   spec:
     output:
       to:
         kind: ImageStreamTag
-        name: playbook2image-example:latest
+        name: ssh-container:latest
     postCommit: {}
     resources: {}
     runPolicy: Serial
@@ -27,77 +24,32 @@ objects:
       type: Git
     strategy:
       dockerStrategy:
+        dockerfilePath: ssh-container/Dockerfile
         from:
           kind: ImageStreamTag
           name: centos:latest
       type: Docker
     triggers:
     - github:
-        secret: OhSDBQtILgAgkxkYcMAt
       type: GitHub
     - generic:
-        secret: LD-sbbmpGsJ8oDeDvKMM
       type: Generic
     - type: ConfigChange
     - imageChange: {}
       type: ImageChange
-  status:
-    lastVersion: 0
 - apiVersion: v1
   kind: BuildConfig
   metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewBuild
+    annotations: null
     creationTimestamp: null
     labels:
-      build: ssh-keygen
-    name: ssh-keygen
+      build: ansible-test-job 
+    name: ansible-test-job
   spec:
     output:
       to:
         kind: ImageStreamTag
-        name: ssh-keygen:latest
-    postCommit: {}
-    resources: {}
-    runPolicy: Serial
-    source:
-      dockerfile: |-
-        FROM centos
-        RUN yum install -y openssh
-      type: Dockerfile
-    strategy:
-      dockerStrategy:
-        from:
-          kind: ImageStreamTag
-          name: centos:latest
-          namespace: playbook2image-ex
-      type: Docker
-    triggers:
-    - github:
-        secret: ctVr6FC2eSeES8eXu85O
-      type: GitHub
-    - generic:
-        secret: DfoMgD-yo9m-Wxuooyd1
-      type: Generic
-    - type: ConfigChange
-    - imageChange: {}
-      type: ImageChange
-  status:
-    lastVersion: 0
-- apiVersion: v1
-  kind: BuildConfig
-  metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewBuild
-    creationTimestamp: null
-    labels:
-      build: test
-    name: test
-  spec:
-    output:
-      to:
-        kind: ImageStreamTag
-        name: test:latest
+        name: ansible-test-job:latest
     postCommit: {}
     resources: {}
     runPolicy: Serial
@@ -113,31 +65,24 @@ objects:
       type: Source
     triggers:
     - github:
-        secret: uuCllU11aXDkBOMvdGP9
       type: GitHub
     - generic:
-        secret: FB072D0PYSat5w0L4pjr
       type: Generic
     - type: ConfigChange
     - imageChange: {}
       type: ImageChange
-  status:
-    lastVersion: 0
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewApp
-    creationTimestamp: null
-    generation: 38
+    annotations: null
     labels:
-      app: playbook2image-example
-    name: playbook2image-example
+      app: ssh-container 
+    name: ssh-container 
   spec:
     replicas: 1
     selector:
-      app: playbook2image-example
-      deploymentconfig: playbook2image-example
+      app: ssh-container 
+      deploymentconfig: ssh-container 
     strategy:
       resources: {}
       rollingParams:
@@ -149,26 +94,21 @@ objects:
       type: Rolling
     template:
       metadata:
-        annotations:
-          openshift.io/container.playbook2image-example.image.entrypoint: '["/bin/bash"]'
-          openshift.io/generated-by: OpenShiftNewApp
-        creationTimestamp: null
+        annotations: null
         labels:
-          app: playbook2image-example
-          deploymentconfig: playbook2image-example
+          app: ssh-container 
+          deploymentconfig: ssh-container 
       spec:
         containers:
-        - image: 172.30.7.246:5000/playbook2image-ex/playbook2image-example@sha256:1868757dd8e45c0506c45a613ef7b2d547b6840f5acc257ee8dee24ee13a41ee
+        - image: ' ' 
           imagePullPolicy: Always
-          name: playbook2image-example
+          name: ssh-container 
           ports:
           - containerPort: 22222
             protocol: TCP
           resources: {}
           terminationMessagePath: /dev/termination-log
           volumeMounts:
-          - mountPath: /tmp/.ssh
-            name: sshkeys
           - mountPath: /opt/app-root/src/.ssh
             name: sshkeys
           - mountPath: /opt/app-root/.ssh
@@ -187,26 +127,19 @@ objects:
     - imageChangeParams:
         automatic: true
         containerNames:
-        - playbook2image-example
+        - ssh-container 
         from:
           kind: ImageStreamTag
-          name: playbook2image-example:latest
-          namespace: playbook2image-ex
+          name: ssh-container:latest
       type: ImageChange
-  status:
-    availableReplicas: 1
-    observedGeneration: 38
-    replicas: 1
-    updatedReplicas: 1
 - apiVersion: v1
   kind: Service
   metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewApp
+    annotations: null
     creationTimestamp: null
     labels:
-      app: playbook2image-example
-    name: playbook2image-example
+      app: ssh-container 
+    name: ssh-container 
   spec:
     ports:
     - name: 22222-tcp
@@ -214,35 +147,28 @@ objects:
       protocol: TCP
       targetPort: 22222
     selector:
-      app: playbook2image-example
-      deploymentconfig: playbook2image-example
+      app: ssh-container 
+      deploymentconfig: ssh-container 
     sessionAffinity: None
     type: ClusterIP
-  status:
-    loadBalancer: {}
 - apiVersion: batch/v1
   kind: Job
   metadata:
     creationTimestamp: null
     labels:
-      app: playbook2image-example
-      controller-uid: 8f375aa5-e8bd-11e6-8568-525400f50924
-      job-name: test
+      app: ansible-test-job 
+      job-name: ansible-test-job 
     name: test
   spec:
     completions: 1
     parallelism: 1
-    selector:
-      matchLabels:
-        controller-uid: 8f375aa5-e8bd-11e6-8568-525400f50924
     template:
       metadata:
         creationTimestamp: null
         labels:
-          app: playbook2image-example
-          controller-uid: 8f375aa5-e8bd-11e6-8568-525400f50924
-          job-name: test
-        name: test
+          app: ansible-test-job 
+          job-name: ansible-test-job 
+        name: ansible-test-job
       spec:
         containers:
         - env:
@@ -260,9 +186,9 @@ objects:
             value: /tmp/foo
           - name: OPTS
             value: -vvvv
-          image: 172.30.7.246:5000/playbook2image-ex/test
+          image: ' ' 
           imagePullPolicy: Always
-          name: test
+          name: ansible-test-job 
           resources: {}
           terminationMessagePath: /dev/termination-log
           volumeMounts:
@@ -276,12 +202,68 @@ objects:
         - name: sshkeys
           secret:
             secretName: sshkeys
-  status:
-    completionTime: 2017-02-01T20:32:42Z
-    conditions:
-    - lastProbeTime: 2017-02-01T20:32:42Z
-      lastTransitionTime: 2017-02-01T20:32:42Z
-      status: "True"
-      type: Complete
-    startTime: 2017-02-01T20:32:33Z
-    succeeded: 1
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations: null
+    creationTimestamp: null
+    name: centos
+  spec:
+    tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: centos:latest
+      importPolicy: {}
+      name: latest
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations: null
+    creationTimestamp: null
+    generation: 2
+    name: playbook2image
+  spec:
+    tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: docker.io/aweiteka/playbook2image
+      generation: 2
+      importPolicy: {}
+      name: latest
+      
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations: null
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: playbook2image-example
+    name: playbook2image-example
+  spec:
+    tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: ssh-container:latest
+      generation: null
+      importPolicy: {}
+      name: latest
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations: null
+    creationTimestamp: null
+    generation: 1
+    name: ansible-test-job 
+  spec:
+    tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: ansible-test-job:latest
+      generation: null
+      importPolicy: {}
+      name: latest
