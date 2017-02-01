@@ -1,3 +1,17 @@
+---
+- name: localhost testing
+  hosts: localhost
+  gather_facts: False
+  tasks:
+    - name: find files in tmp
+      find:
+        paths: /tmp/ssh
+        patterns: "*"
+      register: tmpfiles
+
+    - debug:
+        msg: "{{ tmpfiles }}"
+
 - name: testing
   hosts: test
   remote_user: default
