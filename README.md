@@ -18,6 +18,6 @@ The job is unable to locate the image to use, modify the `image` variable for yo
 oc process -f template.yaml | oc create -f -
 ```
 
-[![asciicast](https://asciinema.org/a/101033.png)](https://asciinema.org/a/101033)
+[![asciicast](https://asciinema.org/a/101608.png)](https://asciinema.org/a/101608)
 
 
