@@ -2,28 +2,28 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: playbook2image-example 
+  name: test
 spec:
   parallelism: 1    
   completions: 1    
   template:         
     metadata:
-      name: playbook2image-example
+      name: test
       labels:
         app: playbook2image-example
     spec:
       containers:
-      - name: playbook2image-example 
-        image: 172.30.7.246:5000/playbook2image-example/playbook2image-example 
+      - name: test 
+        image: 172.30.7.246:5000/playbook2image-ex/test
         env:
-        - name: INVENTORY_URL
-          value: "https://gist.githubusercontent.com/jcpowermac/3010d8115f66cef7aa2a87448be5d6c9/raw/0d60e4b42e06468470b5ac7c57d076eaefbdd032/hosts.ose"
+        - name: INVENTORY_FILE
+          value: "/opt/app-root/src/hosts.ini"
         - name: ANSIBLE_HOST_KEY_CHECKING
           value: "False"
         - name: PLAYBOOK_FILE
           value: "/opt/app-root/src/main.yml"
         - name: ANSIBLE_PRIVATE_KEY_FILE 
-          value: /opt/app-root/src/.ssh/id_rsa/ssh-privatekey
+          value: /opt/app-root/src/.ssh/id_rsa
         - name: ANSIBLE_LOCAL_TEMP
           value: /tmp/ansible-temp
         - name: SSH_KEY
