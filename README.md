@@ -19,5 +19,3 @@ oc process -f template.yaml | oc create -f -
 ```
 
 [![asciicast](https://asciinema.org/a/101608.png)](https://asciinema.org/a/101608)
-
-
