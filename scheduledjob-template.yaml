@@ -162,10 +162,6 @@ objects:
         template:
           metadata:
             creationTimestamp: null
-            labels:
-              app: ansible-test-job 
-              job-name: ansible-test-job 
-            name: ansible-test-job
           spec:
             containers:
             - env:
