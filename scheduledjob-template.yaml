@@ -1,0 +1,268 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: playbook2image-testing 
+objects:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations: null
+    creationTimestamp: null
+    name: ssh-container 
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ssh-container:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      git:
+        uri: https://github.com/jcpowermac/playbook2image-example
+      type: Git
+      contextDir: ssh-container
+    strategy:
+      dockerStrategy:
+        from:
+          kind: ImageStreamTag
+          name: centos:latest
+      type: Docker
+    triggers:
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations: null
+    creationTimestamp: null
+    labels:
+      build: ansible-test-job 
+    name: ansible-test-job
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ansible-test-job:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      git:
+        uri: https://github.com/jcpowermac/playbook2image-example
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: playbook2image:latest
+      type: Source
+    triggers:
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations: null
+    labels:
+      app: ssh-container 
+    name: ssh-container 
+  spec:
+    replicas: 1
+    selector:
+      app: ssh-container 
+      deploymentconfig: ssh-container 
+    strategy:
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations: null
+        labels:
+          app: ssh-container 
+          deploymentconfig: ssh-container 
+      spec:
+        containers:
+        - image: ' ' 
+          imagePullPolicy: Always
+          name: ssh-container 
+          ports:
+          - containerPort: 22222
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - mountPath: /opt/app-root/src/.ssh
+            name: sshkeys
+          - mountPath: /opt/app-root/.ssh
+            name: sshkeys
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: sshkeys
+          secret:
+            secretName: sshkeys
+    test: false
+    triggers:
+    - type: ConfigChange
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ssh-container 
+        from:
+          kind: ImageStreamTag
+          name: ssh-container:latest
+      type: ImageChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations: null
+    creationTimestamp: null
+    labels:
+      app: ssh-container 
+    name: ssh-container 
+  spec:
+    ports:
+    - name: 22222-tcp
+      port: 22222
+      protocol: TCP
+      targetPort: 22222
+    selector:
+      app: ssh-container 
+      deploymentconfig: ssh-container 
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: batch/v2alpha1
+  kind: ScheduledJob
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: ansible-test-job 
+      job-name: ansible-test-job 
+    name: ansible-test-job 
+  spec:
+    concurrencyPolicy: Forbid
+    schedule: '*/2 * * * *'
+    suspend: true
+    jobTemplate:  
+      spec:
+        completions: 1
+        parallelism: 1
+        template:
+          metadata:
+            creationTimestamp: null
+            labels:
+              app: ansible-test-job 
+              job-name: ansible-test-job 
+            name: ansible-test-job
+          spec:
+            containers:
+            - env:
+              - name: INVENTORY_FILE
+                value: /opt/app-root/src/hosts.ini
+              - name: ANSIBLE_HOST_KEY_CHECKING
+                value: "False"
+              - name: PLAYBOOK_FILE
+                value: /opt/app-root/src/main.yml
+              - name: ANSIBLE_PRIVATE_KEY_FILE
+                value: /tmp/ssh/id_rsa
+              - name: ANSIBLE_LOCAL_TEMP
+                value: /tmp/ansible-temp
+              - name: SSH_KEY
+                value: /tmp/foo
+              - name: OPTS
+                value: -vvvv
+              image: '172.30.7.246:5000/at/ansible-test-job'
+              imagePullPolicy: Always
+              name: ansible-test-job 
+              resources: {}
+              terminationMessagePath: /dev/termination-log
+              volumeMounts:
+              - mountPath: /tmp/ssh
+                name: sshkeys
+            dnsPolicy: ClusterFirst
+            restartPolicy: Never
+            securityContext: {}
+            terminationGracePeriodSeconds: 30
+            volumes:
+            - name: sshkeys
+              secret:
+                secretName: sshkeys
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations: null
+    creationTimestamp: null
+    name: centos
+  spec:
+    tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: centos:latest
+      importPolicy: {}
+      name: latest
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations: null
+    creationTimestamp: null
+    generation: 2
+    name: playbook2image
+  spec:
+    tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: docker.io/aweiteka/playbook2image
+      generation: 2
+      importPolicy: {}
+      name: latest
+      
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations: null
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: ssh-container 
+    name: ssh-container 
+  spec:
+    tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: ssh-container:latest
+      generation: null
+      importPolicy: {}
+      name: latest
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations: null
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: ansible-test-job 
+    name: ansible-test-job 
+  spec:
+    tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: ansible-test-job:latest
+      generation: null
+      importPolicy: {}
+      name: latest
